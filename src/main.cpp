@@ -1,40 +1,31 @@
-#include "header_file.h"
+#include "HeaderLibrary.h"
 
-Adafruit_BNO055 bno = Adafruit_BNO055(55);
 
 void setup() {
-  Serial.begin(9600);
-  Wire.begin();
-  delay(1000);
+  Serial.begin(115200);   // Start serial monitor for feedback
+  SPI.begin();            // Start SPI for CAN controller communication
 
-  if (!bno.begin()) {
-    Serial.println("❌ BNO055 not detected. Check wiring.");
-    while (1);
-  }
+  // Initialize CAN controller
+  mcp2515.reset();                                 // Reset MCP2515
+  mcp2515.setBitrate(CAN_1000KBPS, MCP_8MHZ);      // Set CAN speed: 1Mbps, 8MHz crystal
+  mcp2515.setNormalMode();                         // Normal transmission mode
 
-  bno.setExtCrystalUse(true);
+  delay(100);
+  Serial.println("=== System Initialized ===");
 
-  Serial.println("Commands:");
-  Serial.println("  B1 -> Calibrate BNO055");
-  Serial.println("  A1 -> Check AS5600 connection");
-  Serial.println("  B2 -> Read BNO055 orientation + acceleration");
-  Serial.println("  A2 -> Read AS5600 angle");
-  Serial.println("  A3 -> Read both AS5600 + BNO055");
+  // === STEP 1: ENABLE MOTOR ===
+  //motorEnable();                 
+  delay(100);
+
+  // === STEP 2: SET ACCELERATION VALUE ===
+ // setAcceleration((int32_t)input_accel_dps2);
+  //delay(100);
+
+  // === STEP 3: SEND POSITION COMMAND ===
+  // Convert angle to 0.01 deg unit (e.g., 90° → 9000)
+  //sendPositionCommand((uint16_t)(input_angle_deg * 100), (uint16_t)input_speed_dps, direction);
 }
 
 void loop() {
-  if (Serial.available()) {
-    String cmd = Serial.readStringUntil('\n');
-    cmd.trim();
-
-    if (cmd == "B1") calibrateBNO055();
-    else if (cmd == "A1") calibrateAS5600();
-    else if (cmd == "B2") readIMUData();
-    else if (cmd == "A2") readAS5600();
-    else if (cmd == "A3") {
-      readIMUData();
-      readAS5600();
-    }
-    else Serial.println("❓ Unknown command.");
-  }
+  Serial.print("inloop");
 }
